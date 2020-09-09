@@ -94,6 +94,11 @@ double temperature = 0;
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
+// ACS712 Doorbell current sensor
+unsigned long doorbellLength = 0;   // Length of door bell press in millis
+String doorbellTime = "";
+String doorbellPressed = "No";
+
 // ThingSpeak
 unsigned long lastTimeMeasureTS = 0;
 

@@ -115,6 +115,12 @@ void em_loop() {
   thinkgSpeak_loop();
   */
 
+
+    String payload = build_payload();
+
+    Serial.print(" [METER] - Payload: ");
+    Serial.println(payload);
+    
   if (!mqtt_enabled) {
     return;
   }
@@ -125,10 +131,6 @@ void em_loop() {
     initMqtt();
   }
 
-  String payload = build_payload();
-
-  Serial.print(" [METER] - Payload: ");
-  Serial.println(payload);
 
   Status_LED_On;
   // Publish a MQTT message with the payload

@@ -1,12 +1,12 @@
 /*
-  MQTT with ESP8266 and Power Monitor 5th December 2017
-  David Mottram
-  Updated by Alfonso C. Alvarez (Alcar), 14nd September 2019
+   MQTT with ESP8266 and Power Monitor 5th December 2017
+   David Mottram
+   Updated by Alfonso C. Alvarez (Alcar), 14nd September 2019
 
-  @author <a href="mailto:alcar21@gmail.com">Alfonso Carlos Alvarez Reyes</a>
+   @author <a href="mailto:alcar21@gmail.com">Alfonso Carlos Alvarez Reyes</a>
 
-  Compile with Arduino 2.4.2
-*/
+   Compile with Arduino 2.4.2
+ */
 
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>            //Local DNS Server used for redirecting all requests to the configuration portal
@@ -31,82 +31,111 @@
 #include "iot_platforms_support.h"
 #include "power_meter_support.h"
 #include "webserver_support.h"
-#include "MPU6050_motion.h"
+
+#ifdef MOTION
+  #include "MPU6050_motion.h"
+#endif
+
+#ifdef DOORBELL
+  #include "current_meter.h"
+#endif
+
+unsigned long sensorRead = millis();
+
+
 
 // Initial setup
 void setup(void) {
 
-  delay(10);
+        delay(10);
 
-  prepareHostMacAndEvents();
+        prepareHostMacAndEvents();
 
-  pinMode(Status_LED, OUTPUT);                // Initialize Status LED
-  Status_LED_Off;
+        pinMode(Status_LED, OUTPUT);          // Initialize Status LED
+        Status_LED_Off;
 
-  initSerial();
+        initSerial();
 
-  loadConfig();
+        loadConfig();
 
-  setupWifi();
+        setupWifi();
 
-  // emon.current(A0, Ical);             // Current: input pin A6=D4, calibration factor
+        // emon.current(A0, Ical);             // Current: input pin A6=D4, calibration factor
 
-  initMqtt();
+        initMqtt();
 
-  randomSeed(micros());
+        randomSeed(micros());
 
-  ms_since_last_message = millis();           // Reset time since sending last message
+        ms_since_last_message = millis();     // Reset time since sending last message
 
-  setup_http_server();
+        setup_http_server();
 
-  setup_blynk();
+        setup_blynk();
 
-  setup_thingspeak();
+        setup_thingspeak();
 
-  setupOTA();
+        setupOTA();
 
   #ifdef MOTION
-  setupMPU6050();
+        setupMPU6050();
   #endif
 
-  emon.current(A0, Ical);
-  em_read(true);
+  #ifdef DOORBELL
+        acs_setup();
+  #endif
 
-  lastMsgMQTT = millis();
-  lastEMRead = millis();
-  Serial.println("Setup finished");
+  #ifdef ENERGY
+        emon.current(A0, Ical);
+        em_read(true);
+  #endif
+
+        lastMsgMQTT = millis();
+        lastEMRead = millis();
+        Serial.println("Setup finished");
 } // End of setup
 
 
 // main loop
 void loop() {
 
-  ArduinoOTA.handle();
+        ArduinoOTA.handle();
 
-  ntp_loop();
+        ntp_loop();
 
   #ifdef MOTION
-  loopMPU6050();
+        loopMPU6050();
   #endif
 
-  em_loop();
 
-  mqtt_client.loop();
-  httpServer.handleClient(); //handles requests for the firmware update page
+  #ifdef DOORBELL
 
-  if (resetESP) {
-    WiFi.persistent(true); // use SDK storage of SSID/WPA parameters
-    WiFi.disconnect(); // this will store empty ssid/wpa into sdk storage
-    WiFi.persistent(false); // Do not use SDK storage of SSID/WPA parameters
-    Serial.println("formatting...");
-    SPIFFS.format();
-    ESP.restart();
-    delay(100);
-  }
+        acs_loop();
 
-  if (restartESP) {
-    ESP.restart();
-    delay(100);
-  }
+        #endif
+
+  #ifdef ENERGY
+
+        em_loop();
+
+  #endif
+
+
+        mqtt_client.loop();
+        httpServer.handleClient(); //handles requests for the firmware update page
+
+        if (resetESP) {
+                WiFi.persistent(true); // use SDK storage of SSID/WPA parameters
+                WiFi.disconnect(); // this will store empty ssid/wpa into sdk storage
+                WiFi.persistent(false); // Do not use SDK storage of SSID/WPA parameters
+                Serial.println("formatting...");
+                SPIFFS.format();
+                ESP.restart();
+                delay(100);
+        }
+
+        if (restartESP) {
+                ESP.restart();
+                delay(100);
+        }
 
 } // End of main loop

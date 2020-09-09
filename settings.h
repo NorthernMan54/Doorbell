@@ -28,16 +28,28 @@
 #define DEFAULT_VOLTAGE 225.0
 #define DEFAULT_ICAL 30.50
 // TIMEZONE
-#define DEFAULT_TIMEZONE 1
+#define DEFAULT_TIMEZONE -5
 #define DEFAULT_MINUTES_TIMEZONE 0
 // SYSTEM
 #define DEFAULT_SYSTEM_USER "wemosem"
 #define DEFAULT_SYSTEM_PASSWORD ""
+// Energy Monitor
+// #define ENERGY
 // Motion Sensor
 // #define MOTION           // Uncomment to enable
 #define INTERRUPT_PIN D5  // use pin 2 on Arduino Uno & most boards
 #define SCL_PIN D6
 #define SDA_PIN D7
+// ACS712 Current Sensor
+// ESP8266 has 3.3 volt with a max ADC value of 1023 steps
+// ACS712 5A  uses 185 mV per A
+// ACS712 20A uses 100 mV per A
+// ACS712 30A uses  66 mV per A
+#define DOORBELL
+#define ACS_PIN A0
+#define ACS_MAX_VOLTAGE 3.3
+#define ACS_MAX_ADC 1023
+#define ACS_MV_PER_A 185
 
 // VARIABLES
 String system_password = DEFAULT_SYSTEM_PASSWORD;

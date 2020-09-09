@@ -118,16 +118,24 @@ String build_payload() {
   // WiFi signal strength in dB
   String rssi = WifiGetRssiAsQuality(WiFi.RSSI());
 
+  #ifdef ENERGY
   json["current"] = String(rmsCurrent);
   json["voltage"] = String(mainsVoltage);
   json["watios"] = String(rmsPower);
   json["kwh"] = String(kiloWattHours);
   json["beforeKwh"] = String(beforeResetKiloWattHours);
+  json["ical"] = String(Ical);
+  #endif
+  #ifdef DOORBELL
+  json["current"] = String(rmsCurrent);
+  json["doorbell"] = String(doorbellLength);
+  json["doorbellTime"] = String(doorbellTime);
+  json["doorbellPressed"] = String(doorbellPressed);
+  #endif
   #ifdef MOTION
   json["motion"] = String(motionAverage);
   json["temperature"] = String(temperature);
   #endif
-  json["ical"] = String(Ical);
   json["mqttreconnected"] = String(reconnected_count);
   json["wifidb"] = rssi;
   json["uptime"] = NTP.getUptimeString ();
