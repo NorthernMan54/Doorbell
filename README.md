@@ -28,14 +28,12 @@ The circuit for this was pretty simple just the ESP8266 and ACS712. ![simple](do
 
 ## Integration in Homebridge
 
-I integrated this into homebridge and the homebridge-camera-ffmpeg plugin using node-red to catch the door pressed event message and trigger the doorbell trigger accessory.
+I integrated this into homebridge and the homebridge-camera-ffmpeg plugin using node-red to catch the doorbell pressed event message and trigger the doorbell trigger accessory.
 
 The flow looks like this. ![Node Red Flow](docs/node-red-doorbell.png)
 
 
-## Need to cleanup below this line
-
-
+## Need to cleanup below this line, this is the original README from WemosEM Codebase / Repository
 
 
 
