@@ -1,6 +1,4 @@
-# Doorbell
-
-<img src="images/wemos-sensor-stc013.jpg" style="max-width: 100%;height: auto;" align="center" />
+## Doorbell
 
 This is a fork of [@alcar21](https://github.com/alcar21/WemosEM) which is a fork of [@nephiel](https://github.com/Nephiel/MQTT-Power-Sensor) and [@Mottramlabs](https://github.com/Mottramlabs/MQTT-Power-Sensor) projects.
 
@@ -8,10 +6,11 @@ This is a Doorbell current sensor used to detect button presses and send MQTT me
 
 ## Circuit
 
-The circuit for this was pretty [simple](docs/IMG_5339.jpg) just the ESP8266 and ACS712.  That was my working prototype before I soldered up the final version. I powered the ACS712 from the 5v pin on the ESP8266, and connected the output of the ACS712 to the ADC pin of the ESP8266.
+The circuit for this was pretty ![simple](docs/IMG_5339.jpg) just the ESP8266 and ACS712.  That was my working prototype before I soldered up the final version. I powered the ACS712 from the 5v pin on the ESP8266, and connected the output of the ACS712 to the ADC pin of the ESP8266.
 
 ## MQTT Message Structure
 
+```
 {
   "current": "0.00",           // This is the current reported by the ACS712 Sensor
   "voltage": "2.53",           // This is the current voltage measured by the ADC pin on the ESP8266
@@ -25,6 +24,7 @@ The circuit for this was pretty [simple](docs/IMG_5339.jpg) just the ESP8266 and
   "freemem": 32488,
   "version": "WemosDB 1.3"
 }
+```
 
 ## Need to cleanup below this line
 
