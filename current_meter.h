@@ -27,10 +27,10 @@ void acs_loop() {
         rmsCurrent = mA;
         // After button has been pressed send a message with length of button press
 
-        Serial.print("mA: ");
-        Serial.println(mA);
+        // Serial.print("mA: ");
+        // Serial.println(mA);
 
-        if ( mA >  5000) { // Pressed
+        if ( mA >  500) { // Pressed
           if ( currentState == 1 ) { // already pressed
             return;
           } else {
