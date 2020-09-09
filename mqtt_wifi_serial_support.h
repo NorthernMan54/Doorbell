@@ -128,6 +128,7 @@ String build_payload() {
   #endif
   #ifdef DOORBELL
   json["current"] = String(rmsCurrent);
+  json["voltage"] = String(mainsVoltage);
   json["doorbellLength"] = String(doorbellLength);
   json["doorbellTime"] = String(doorbellTime);
   json["doorbellPressed"] = String(doorbellPressed);

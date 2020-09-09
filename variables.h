@@ -30,7 +30,7 @@
 #define MIN_MESSAGE_INTERVAL 5000
 #define MAXLEN_MESSAGE_INTERVAL 7
 
-#define HOSTNAME_PREFIX "wemosEM-"
+#define HOSTNAME_PREFIX "wemosDB-"
 
 #define TOPIC_VOLTAGE "voltage"
 #define TOPIC_STATUS "status"
@@ -50,7 +50,7 @@ const PROGMEM char TOPIC_HA_CURRENT[] = "homeassistant/sensor/%s/current/config"
 const PROGMEM char TOPIC_HA_POWER[] = "homeassistant/sensor/%s/power/config";
 const PROGMEM char TOPIC_HA_KWH[] = "homeassistant/sensor/%s/kwh/config";
 // const PROGMEM char TOPIC_HA_KWTOTAL[] = "homeassistant/sensor/%s/kwTotal/config";
-const PROGMEM char VERSION[] = "WemosEM 1.3";
+const PROGMEM char VERSION[] = "WemosDB 1.3";
 const PROGMEM char MESSAGE_HA_CURRENT[] = "{\"unit_of_measurement\":\"A\",\"state_topic\":\"wemos/%s/power\",\"value_template\":\"{{ value_json.current }}\",\"json_attributes_topic\":\"wemos/%s/power\",\"name\":\"%s-current\",\"unique_id\":\"%s-current-wemosem\",\"device\":{\"identifiers\":[\"%s\"],\"name\":\"%s\",\"sw_version\":\"WemosEM 1.2\",\"model\":\"Wemos D1 Mini + SCT013\",\"manufacturer\":\"Wemos\"},\"icon\":\"mdi:counter\",\"availability_topic\":\"wemos/%s/status\"}";
 const PROGMEM char MESSAGE_HA_POWER[] = "{\"unit_of_measurement\":\"w\",\"state_topic\":\"wemos/%s/power\",\"device_class\":\"power\",\"value_template\":\"{{ value_json.watios }}\",\"json_attributes_topic\":\"wemos/%s/power\",\"name\":\"%s-watios\",\"unique_id\":\"%s-watios-wemosem\",\"device\":{\"identifiers\":[\"%s\"],\"name\":\"%s\",\"sw_version\":\"WemosEM 1.2\",\"model\":\"Wemos D1 Mini + SCT013\",\"manufacturer\":\"Wemos\"},\"icon\":\"mdi:counter\",\"availability_topic\":\"wemos/%s/status\"}";
 const PROGMEM char MESSAGE_HA_KWH[] = "{\"unit_of_measurement\":\"kwh\",\"state_topic\":\"wemos/%s/power\",\"device_class\":\"power\",\"value_template\":\"{{ value_json.kwh }}\",\"json_attributes_topic\":\"wemos/%s/power\",\"name\":\"%s-kwh\",\"unique_id\":\"%s-kwh-wemosem\",\"device\":{\"identifiers\":[\"%s\"],\"name\":\"%s\",\"sw_version\":\"WemosEM 1.2\",\"model\":\"Wemos D1 Mini + SCT013\",\"manufacturer\":\"Wemos\"},\"icon\":\"mdi:counter\",\"availability_topic\":\"wemos/%s/status\"}";

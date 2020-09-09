@@ -56,6 +56,7 @@ void acs_loop() {
           }
         }
 
+        mainsVoltage = analogRead(ACS_PIN) * 3.3 / 1024;
         lastMsgMQTT = now;
         String payload = build_payload();
 
