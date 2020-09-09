@@ -6,7 +6,7 @@ This is a Doorbell current sensor used to detect button presses and send MQTT me
 
 ## Circuit
 
-The circuit for this was pretty ![simple](docs/IMG_5339.jpg) just the ESP8266 and ACS712.  That was my working prototype before I soldered up the final version. I powered the ACS712 from the 5v pin on the ESP8266, and connected the output of the ACS712 to the ADC pin of the ESP8266.
+The circuit for this was pretty simple just the ESP8266 and ACS712. ![simple](docs/IMG_5339.jpg) That was my working prototype before I soldered up the final version. I powered the ACS712 from the 5v pin on the ESP8266, and connected the output of the ACS712 to the ADC pin of the ESP8266.
 
 ## MQTT Message Structure
 
