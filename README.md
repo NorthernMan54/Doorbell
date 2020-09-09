@@ -32,6 +32,8 @@ I integrated this into homebridge and the homebridge-camera-ffmpeg plugin using 
 
 The flow looks like this. ![Node Red Flow](docs/node-red-doorbell.png)
 
+The "Doorbell Doorbell Trigger" node is from node-red homebridge-automation module.
+
 
 ## Need to cleanup below this line, this is the original README from WemosEM Codebase / Repository
 
