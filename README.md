@@ -36,7 +36,7 @@ The flow looks like this. ![Node Red Flow](docs/node-red-doorbell.png)
 
 The "Doorbell Doorbell Trigger" node is from node-red homebridge-automation module.
 
-Here is my final implementation of the door bell with integration into [Alexa](https://youtu.be/PhGbc_TO8pk),
+Here is my final implementation of the door bell with integration into [Alexa](https://youtu.be/PhGbc_TO8pk).
 
 
 
