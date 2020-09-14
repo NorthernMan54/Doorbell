@@ -6,7 +6,9 @@ This is a Doorbell current sensor used to detect button presses and send MQTT me
 
 ## Circuit
 
-The circuit for this was pretty simple just the ESP8266 and ACS712. ![simple](docs/IMG_5339.jpg) That was my working prototype before I soldered up the final version. I powered the ACS712 from the 5v pin on the ESP8266, and connected the output of the ACS712 to the ADC pin of the ESP8266.
+The circuit for this was pretty simple just the ESP8266 and ACS712. ![simple](docs/IMG_5339.jpg) That was my working prototype before I soldered up the final version. I powered the ACS712 from the 5v pin on the ESP8266, and connected the output of the ACS712 to the ADC pin of the ESP8266.  And here is my final device.
+
+![Final](docs/IMG_5361.jpg)
 
 ## MQTT Message Structure
 
@@ -26,7 +28,7 @@ The circuit for this was pretty simple just the ESP8266 and ACS712. ![simple](do
 }
 ```
 
-## Integration in Homebridge
+## Integration in Homebridge and Alexa
 
 I integrated this into homebridge and the homebridge-camera-ffmpeg plugin using node-red to catch the doorbell pressed event message and trigger the doorbell trigger accessory.
 
@@ -34,9 +36,11 @@ The flow looks like this. ![Node Red Flow](docs/node-red-doorbell.png)
 
 The "Doorbell Doorbell Trigger" node is from node-red homebridge-automation module.
 
+Here is my final implementation of the door bell with integration into [Alexa](https://youtu.be/PhGbc_TO8pk),
 
-## Need to cleanup below this line, this is the original README from WemosEM Codebase / Repository
 
+
+# Need to cleanup below this line, this is the original README from WemosEM Codebase / Repository
 
 
 
