@@ -108,17 +108,13 @@ void loop() {
 
 
   #ifdef DOORBELL
-
+        // Serial.print(".");
         acs_loop();
-
-        #endif
-
-  #ifdef ENERGY
-
-        em_loop();
-
   #endif
 
+  #ifdef ENERGY
+        em_loop();
+  #endif
 
         mqtt_client.loop();
         httpServer.handleClient(); //handles requests for the firmware update page

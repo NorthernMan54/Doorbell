@@ -1,110 +1,112 @@
 /*
-  MQTT, Wifi and serial functions
+   MQTT, Wifi and serial functions
 
-  Alfonso C. Alvarez (Alcar), 14nd September 2019
+   Alfonso C. Alvarez (Alcar), 14nd September 2019
 
-  @author <a href="mailto:alcar21@gmail.com">Alfonso Carlos Alvarez Reyes</a>
+   @author <a href="mailto:alcar21@gmail.com">Alfonso Carlos Alvarez Reyes</a>
 
-  Compile with Arduino 2.4.2
-*/
+   Compile with Arduino 2.4.2
+ */
 
 // Function defined in power_meter_support.h
 void resetKwh();
+String buildHADiscovery();
+String buildHAStatus();
 
 void setupOTA() {
-  // Hostname defaults to esp8266-[ChipID]
-  ArduinoOTA.setHostname(wifi_hostname.c_str());
+        // Hostname defaults to esp8266-[ChipID]
+        ArduinoOTA.setHostname(wifi_hostname.c_str());
 
-  // No authentication by default
-  // ArduinoOTA.setPassword((const char *)"123");
+        // No authentication by default
+        // ArduinoOTA.setPassword((const char *)"123");
 
-  ArduinoOTA.onStart([]() {
-    Serial.println("[OTA] Start");
-  });
+        ArduinoOTA.onStart([] () {
+                Serial.println("[OTA] Start");
+        });
 
-  ArduinoOTA.onEnd([]() {
-    Serial.println("\n[OTA] End");
-  });
+        ArduinoOTA.onEnd([] () {
+                Serial.println("\n[OTA] End");
+        });
 
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("[OTA] Progress: %u%%\r", (progress / (total / 100)));
-  });
+        ArduinoOTA.onProgress([] (unsigned int progress, unsigned int total) {
+                Serial.printf("[OTA] Progress: %u%%\r", (progress / (total / 100)));
+        });
 
-  ArduinoOTA.onError([](ota_error_t error) {
+        ArduinoOTA.onError([] (ota_error_t error) {
 
-    Serial.printf("[OTA] Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
+                Serial.printf("[OTA] Error[%u]: ", error);
+                if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+                else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+                else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+                else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+                else if (error == OTA_END_ERROR) Serial.println("End Failed");
+        });
 
-  ArduinoOTA.begin();
-    Serial.println("[OTA] Arduino OTA Started");
+        ArduinoOTA.begin();
+        Serial.println("[OTA] Arduino OTA Started");
 }
 
 boolean isSTA() {
-  return (WiFi.isConnected() && WiFi.localIP() != IPAddress(192,168,4,1));
+        return (WiFi.isConnected() && WiFi.localIP() != IPAddress(192,168,4,1));
 }
 
 String WifiGetRssiAsQuality(int rssi)
 {
-  String qualityStr = "0% No signal";
-  int quality = 2 * (rssi + 100);
+        String qualityStr = "0% No signal";
+        int quality = 2 * (rssi + 100);
 
-  if (rssi <= -100) {
-    qualityStr = "0% No signal";
-  } else if (rssi >= -50) {
-    qualityStr = "100% Excelent";
-  } else if (rssi >= -60) {
-    qualityStr = String(quality) + "% Good";
-  } else if (rssi >= -70) {
-    qualityStr = String(quality) + "% Poor";
-  } else if (rssi > -80) {
-    qualityStr = String(quality) + "% Bad";
-  }  else {
-    qualityStr = String(quality) + "% Very weak";
-  }
-  return qualityStr;
+        if (rssi <= -100) {
+                qualityStr = "0% No signal";
+        } else if (rssi >= -50) {
+                qualityStr = "100% Excelent";
+        } else if (rssi >= -60) {
+                qualityStr = String(quality) + "% Good";
+        } else if (rssi >= -70) {
+                qualityStr = String(quality) + "% Poor";
+        } else if (rssi > -80) {
+                qualityStr = String(quality) + "% Bad";
+        }  else {
+                qualityStr = String(quality) + "% Very weak";
+        }
+        return qualityStr;
 }
 
 void callbackMqtt(char* topic, byte* payload, unsigned int length) {
 
-  char topicWemosEM[25];
+        char topicWemosEM[25];
 
-  Serial.print(" [MQTT] - Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
+        Serial.print(" [MQTT] - Message arrived [");
+        Serial.print(topic);
+        Serial.print("] ");
+        for (int i = 0; i < length; i++) {
+                Serial.print((char)payload[i]);
+        }
+        Serial.println();
 
-  char* isTopic = strstr(topic, mqtt_topic_prefix_subscribe.c_str() );
-  if (!isTopic) {
-    return;
-  }
+        char* isTopic = strstr(topic, mqtt_topic_prefix_subscribe.c_str() );
+        if (!isTopic) {
+                return;
+        }
 
-  String command = String(strrchr(topic, '/') + 1);
+        String command = String(strrchr(topic, '/') + 1);
 
-  String s_payload = String((char *)payload);
+        String s_payload = String((char *)payload);
 
-  if(command.equals(TOPIC_VOLTAGE)) {
+        if(command.equals(TOPIC_VOLTAGE)) {
 
-    Serial.println(" [MQTT] - Setting MQTT voltage " + s_payload);
-    if (s_payload.length() > 0 && s_payload.toFloat() > 0) {
-      mainsVoltage = s_payload.toFloat();
-    }
-  } else if (command.equals(TOPIC_STATUS)) {
+                Serial.println(" [MQTT] - Setting MQTT voltage " + s_payload);
+                if (s_payload.length() > 0 && s_payload.toFloat() > 0) {
+                        mainsVoltage = s_payload.toFloat();
+                }
+        } else if (command.equals(TOPIC_STATUS)) {
 
-    Serial.println(" [MQTT] - Processing MQTT status ");
-    mqtt_client.publish(mqtt_topic_status.c_str(), (char*) "online");
-  } else if (command.equals(TOPIC_RESET_KWH)) {
+                Serial.println(" [MQTT] - Processing MQTT status ");
+                mqtt_client.publish(mqtt_topic_status.c_str(), (char*) "online");
+        } else if (command.equals(TOPIC_RESET_KWH)) {
 
-    Serial.println(" [MQTT] - Processing MQTT reset KWH ");
-    resetKwh();
-  }
+                Serial.println(" [MQTT] - Processing MQTT reset KWH ");
+                resetKwh();
+        }
 
 }
 
@@ -112,249 +114,332 @@ void callbackMqtt(char* topic, byte* payload, unsigned int length) {
 // The payload and headers cannot exceed 128 bytes!
 String build_payload() {
 
-  StaticJsonDocument<512> json;
-  String jsonString;
+        StaticJsonDocument<512> json;
+        String jsonString;
 
-  // WiFi signal strength in dB
-  String rssi = WifiGetRssiAsQuality(WiFi.RSSI());
+        // WiFi signal strength in dB
+        String rssi = WifiGetRssiAsQuality(WiFi.RSSI());
 
   #ifdef ENERGY
-  json["current"] = String(rmsCurrent);
-  json["voltage"] = String(mainsVoltage);
-  json["watios"] = String(rmsPower);
-  json["kwh"] = String(kiloWattHours);
-  json["beforeKwh"] = String(beforeResetKiloWattHours);
-  json["ical"] = String(Ical);
+        json["current"] = String(rmsCurrent);
+        json["voltage"] = String(mainsVoltage);
+        json["watios"] = String(rmsPower);
+        json["kwh"] = String(kiloWattHours);
+        json["beforeKwh"] = String(beforeResetKiloWattHours);
+        json["ical"] = String(Ical);
   #endif
   #ifdef DOORBELL
-  json["current"] = String(rmsCurrent);
-  json["voltage"] = String(mainsVoltage);
-  json["doorbellLength"] = String(doorbellLength);
-  json["doorbellTime"] = String(doorbellTime);
-  json["doorbellPressed"] = String(doorbellPressed);
+        json["current"] = String(rmsCurrent);
+        json["voltage"] = String(mainsVoltage);
+        json["doorbellLength"] = String(doorbellLength);
+        json["doorbellTime"] = String(doorbellTime);
+        json["doorbellPressed"] = String(doorbellPressed);
   #endif
   #ifdef MOTION
-  json["motion"] = String(motionAverage);
-  json["temperature"] = String(temperature);
+        json["motion"] = String(motionAverage);
+        json["temperature"] = String(temperature);
   #endif
-  json["mqttreconnected"] = String(reconnected_count);
-  json["wifidb"] = rssi;
-  json["uptime"] = NTP.getUptimeString ();
-  json["time"] = NTP.getTimeDateString();
-  json["freemem"] = ESP.getFreeHeap();
-  json["version"] = String(VERSION);
+        json["mqttreconnected"] = String(reconnected_count);
+        json["wifidb"] = rssi;
+        json["uptime"] = NTP.getUptimeString ();
+        json["time"] = NTP.getTimeDateString();
+        json["freemem"] = ESP.getFreeHeap();
+        json["version"] = String(VERSION);
 
-  serializeJson(json, jsonString);
+        serializeJson(json, jsonString);
 
-  return jsonString;
+        return jsonString;
 }
 
 // SERIAL FUNCTIONS
 void initSerial() {
 
-  Serial.begin(115200);
-  delay(500);
-  Serial.println("");
-  Serial.println("");
-  Serial.print("* Starting up *");
-  Serial.println(VERSION);
+        Serial.begin(115200);
+        delay(500);
+        Serial.println("");
+        Serial.println("");
+        Serial.print("* Starting up *");
+        Serial.println(VERSION);
 }
 
 void prepareHostMacAndEvents() {
 
-  gotIpEventHandler = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP& event) {
-    Serial.print("Station connected, IP: ");
-    Serial.println(WiFi.localIP());
-    wifiFirstConnected = true;
+        gotIpEventHandler = WiFi.onStationModeGotIP([] (const WiFiEventStationModeGotIP& event) {
+                Serial.print("Station connected, IP: ");
+                Serial.println(WiFi.localIP());
+                wifiFirstConnected = true;
 
-    wifi_name = WiFi.SSID();
-    wifi_password =  WiFi.psk();
-    ip = WiFi.localIP().toString();
-    mask =WiFi.subnetMask().toString();
-    gateway = WiFi.gatewayIP().toString();
-  });
+                wifi_name = WiFi.SSID();
+                wifi_password =  WiFi.psk();
+                ip = WiFi.localIP().toString();
+                mask =WiFi.subnetMask().toString();
+                gateway = WiFi.gatewayIP().toString();
+        });
 
-  disconnectedEventHandler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected& event) {
-    Serial.println("Station disconnected");
-    wifiFirstConnected = false;
-  });
+        disconnectedEventHandler = WiFi.onStationModeDisconnected([] (const WiFiEventStationModeDisconnected& event) {
+                Serial.println("Station disconnected");
+                wifiFirstConnected = false;
+        });
 
-  // Get MAC address of ESP8266, 6 bytes in an array
-  byte mac[6];
-  WiFi.macAddress(mac);
+        // Get MAC address of ESP8266, 6 bytes in an array
+        byte mac[6];
+        WiFi.macAddress(mac);
 
-  My_MAC = "";
-  // Build a string of the MAC with "0" padding for each byte, and upper case
-  for (int i = 0; i <= 5; i++) {
-    String B = String(mac[i], HEX);
-    B.toUpperCase();
-    if (B.length() < 2) {
-      // Pad with leading zero if needed
-      B = "0" + B;
-    }
-    My_MAC += B;
-  } // End of for
-  wifi_hostname = String(HOSTNAME_PREFIX);
-  wifi_hostname.concat(My_MAC.substring(6, 12));
+        My_MAC = "";
+        // Build a string of the MAC with "0" padding for each byte, and upper case
+        for (int i = 0; i <= 5; i++) {
+                String B = String(mac[i], HEX);
+                B.toUpperCase();
+                if (B.length() < 2) {
+                        // Pad with leading zero if needed
+                        B = "0" + B;
+                }
+                My_MAC += B;
+        } // End of for
+        wifi_hostname = String(HOSTNAME_PREFIX);
+        wifi_hostname.concat(My_MAC.substring(6, 12));
 
-  WiFi.hostname(wifi_hostname.c_str());
+        WiFi.hostname(wifi_hostname.c_str());
 }
 
 // Try to connect to any of the WiFi networks configured in Custom_Settings.h
 void setupWifi() {
 
-  //Set the wifi config portal to only show for 3 minutes, then continue.
-  WiFi.hostname(wifi_hostname.c_str());
-  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+        //Set the wifi config portal to only show for 3 minutes, then continue.
+        WiFi.hostname(wifi_hostname.c_str());
+        WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
-  if (wifi_name.length() > 0 && wifi_password.length() > 0 ) {
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(wifi_name.c_str(), wifi_password.c_str());
-    delay(300);
-  }
+        if (wifi_name.length() > 0 && wifi_password.length() > 0 ) {
+                WiFi.mode(WIFI_STA);
+                WiFi.begin(wifi_name.c_str(), wifi_password.c_str());
+                delay(300);
+        }
 
-  wifiManager.setConfigPortalTimeout(180);
-  wifiManager.setConnectTimeout(60);
-  Serial.println(" Wifi " + wifi_hostname + ", password " + system_password);
-  if (system_password.length() > 0 ) {
-    wifiManager.autoConnect(wifi_hostname.c_str(), system_password.c_str());
-  } else {
-    wifiManager.autoConnect(wifi_hostname.c_str());
-  }
+        wifiManager.setConfigPortalTimeout(180);
+        wifiManager.setConnectTimeout(60);
+        Serial.println(" Wifi " + wifi_hostname + ", password " + system_password);
+        if (system_password.length() > 0 ) {
+                wifiManager.autoConnect(wifi_hostname.c_str(), system_password.c_str());
+        } else {
+                wifiManager.autoConnect(wifi_hostname.c_str());
+        }
 
-  if (isSTA() && ipMode == 1) {
-    IPAddress ipa_ip, ipa_gateway, ipa_subnet;
-    if (ipa_ip.fromString(ip) && ipa_gateway.fromString(gateway) &&  ipa_subnet.fromString(mask)) {
-      // Static IP Setup
-      WiFi.config(ipa_ip, ipa_gateway, ipa_subnet);
-      Serial.println(" using Static IP " + String(ip));
-    } else {
-      Serial.println("Error in static parameters, using DHCP");
-    }
-  } else {
-    Serial.println(" using DHCP");
-  }
+        if (isSTA() && ipMode == 1) {
+                IPAddress ipa_ip, ipa_gateway, ipa_subnet;
+                if (ipa_ip.fromString(ip) && ipa_gateway.fromString(gateway) &&  ipa_subnet.fromString(mask)) {
+                        // Static IP Setup
+                        WiFi.config(ipa_ip, ipa_gateway, ipa_subnet);
+                        Serial.println(" using Static IP " + String(ip));
+                } else {
+                        Serial.println("Error in static parameters, using DHCP");
+                }
+        } else {
+                Serial.println(" using DHCP");
+        }
 
 }
 
 void discoverHA() {
 
-  char topic[60], message[600];
+        char topic[60], message[600];
+        String payload;
 
-  // Current (A)
-  Serial.println("Preparing topic HA Discover");
-  sprintf_P(topic, TOPIC_HA_CURRENT, wifi_hostname.c_str() );
+  #ifdef ENERGY
+        // Current (A)
+        Serial.println("Preparing topic HA Discover");
+        sprintf_P(topic, TOPIC_HA_CURRENT, wifi_hostname.c_str() );
+        Serial.println("Preparing message HA Discover");
+        sprintf_P(message, MESSAGE_HA_CURRENT, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
+        mqtt_client.publish(topic, message, true);
+
+        // Power (watios)
+        sprintf_P(topic, TOPIC_HA_POWER, wifi_hostname.c_str() );
+        sprintf_P(message, MESSAGE_HA_POWER, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
+        mqtt_client.publish(topic, message, true);
+
+        // Power (kwh)
+        sprintf_P(topic, TOPIC_HA_KWH, wifi_hostname.c_str() );
+        sprintf_P(message, MESSAGE_HA_KWH, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
+        mqtt_client.publish(topic, message, true);
+
+  #endif
+
+  #ifdef DOORBELL
+        Serial.println("Preparing topic HA Discover");
+        sprintf_P(topic, TOPIC_HA_DOORBELL, wifi_hostname.c_str() );
+        Serial.println("Preparing message HA Discover");
+        payload = buildHADiscovery();
+        mqtt_client.publish(topic, (char*) payload.c_str(), true);
+  #endif
+  Serial.println("Preparing topic HA Discover-status");
+  sprintf_P(topic, TOPIC_HA_STATUS, wifi_hostname.c_str() );
   Serial.println("Preparing message HA Discover");
-  sprintf_P(message, MESSAGE_HA_CURRENT, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
-  mqtt_client.publish(topic, message, true);
+  payload = buildHAStatus();
+  mqtt_client.publish(topic, (char*) payload.c_str(), true);
 
-  // Power (watios)
-  sprintf_P(topic, TOPIC_HA_POWER, wifi_hostname.c_str() );
-  sprintf_P(message, MESSAGE_HA_POWER, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
-  mqtt_client.publish(topic, message, true);
+        // Power (kwTotal)
+        // sprintf_P(topic, TOPIC_HA_KWTOTAL, wifi_hostname.c_str() );
+        // sprintf_P(message, MESSAGE_HA_KWTOTAL, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
+        // mqtt_client.publish(topic, message, true);
 
-  // Power (kwh)
-  sprintf_P(topic, TOPIC_HA_KWH, wifi_hostname.c_str() );
-  sprintf_P(message, MESSAGE_HA_KWH, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
-  mqtt_client.publish(topic, message, true);
+}
 
-  // Power (kwTotal)
-  // sprintf_P(topic, TOPIC_HA_KWTOTAL, wifi_hostname.c_str() );
-  // sprintf_P(message, MESSAGE_HA_KWTOTAL, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
-  // mqtt_client.publish(topic, message, true);
+String buildHADiscovery() {
 
+        StaticJsonDocument<512> json;
+        String jsonString;
+        char unique_id[32];
+
+        json["name"] = wifi_hostname.c_str();
+        json["state_topic"] = mqtt_topic.c_str();
+        json["availability_topic"] = mqtt_topic_status.c_str();
+        json["payload_available"] = "online";
+        json["payload_not_available"] = "offline";
+
+        JsonArray identifiers = json.createNestedArray("identifiers");
+        identifiers.add(wifi_hostname.c_str());
+
+  #ifdef DOORBELL
+        json["value_template"] = "{{ value_json.doorbellPressed }}";
+        json["payload_on"] = "Yes";
+        json["payload_off"] = "No";
+        json["off_delay"] = 10;
+        sprintf_P(unique_id, "%s_doorbell", wifi_hostname.c_str() );
+  #endif
+
+  #ifdef ENERGY
+        // Future
+  #endif
+
+  #ifdef MOTION
+        // Future
+  #endif
+        json["unique_id"] = unique_id;
+        serializeJson(json, jsonString);
+
+        return jsonString;
+}
+
+String buildHAStatus() {
+
+        StaticJsonDocument<512> json;
+        String jsonString;
+        char unique_id[32];
+
+        json["name"] = wifi_hostname.c_str();
+        json["state_topic"] = mqtt_topic.c_str();
+        json["availability_topic"] = mqtt_topic_status.c_str();
+        json["payload_available"] = "online";
+        json["payload_not_available"] = "offline";
+        json["val_tpl"] = "{{value_json.wifidb}}";
+
+        json["device"]["name"] = wifi_hostname.c_str();
+        json["device"]["model"] = MODEL;
+        json["device"]["sw_version"] = VERSION;
+        json["device"]["manufacturer"] = "WemosDB";
+
+        JsonObject device = json["device"].to<JsonObject>();
+        JsonArray identifiers = device.createNestedArray("identifiers");
+        identifiers.add(wifi_hostname.c_str());
+
+        sprintf_P(unique_id, "%s_status", wifi_hostname.c_str() );
+        json["unique_id"] = unique_id;
+
+        serializeJson(json, jsonString);
+
+        return jsonString;
 }
 
 void initMqtt() {
 
-  String mqtt_topic_prefix = "wemos/" + wifi_hostname + "/";
+        String mqtt_topic_prefix = "wemos/" + wifi_hostname + "/";
 
-  mqtt_topic_prefix_subscribe = "wemos-cmd/" + wifi_hostname;
-  mqtt_topic_subscribe = mqtt_topic_prefix_subscribe + "/#";
-  mqtt_topic = mqtt_topic_prefix + "power";
-  mqtt_topic_status = mqtt_topic_prefix + "status";
+        mqtt_topic_prefix_subscribe = "wemos-cmd/" + wifi_hostname;
+        mqtt_topic_subscribe = mqtt_topic_prefix_subscribe + "/#";
+        mqtt_topic = mqtt_topic_prefix + "state";
+        mqtt_topic_status = mqtt_topic_prefix + "LWT";
 
-  mqtt_client.setServer(mqtt_server.c_str(), mqtt_port);
-  mqtt_client.setCallback(callbackMqtt);
+        mqtt_client.setServer(mqtt_server.c_str(), mqtt_port);
+        mqtt_client.setCallback(callbackMqtt);
 
-  if (WiFi.status() != WL_CONNECTED) {
-      // Attempt to connect
-      setupWifi();
-  }
+        if (WiFi.status() != WL_CONNECTED) {
+                // Attempt to connect
+                setupWifi();
+        }
 
-  int lwQoS = 1; // send last will at least once
-  int lwRetain = 1;
-  String lwPayload = "offline";
-  bool cleanSession = true;
-  int connected = false;
+        int lwQoS = 1; // send last will at least once
+        int lwRetain = 1;
+        String lwPayload = "offline";
+        bool cleanSession = true;
+        int connected = false;
 
-  if (mqtt_enabled) {
-    Serial.println("Connecting Mqtt...");
-    if (mqtt_username.length() > 0 && mqtt_password.length() > 0) {
-        Serial.println("Connecting MQTT with user/pass");
-        connected = mqtt_client.connect(wifi_hostname.c_str(), (char*)mqtt_username.c_str(), (char*)mqtt_password.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str(), cleanSession);
-    } else {
-        connected = mqtt_client.connect(wifi_hostname.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str());
-    }
+        if (mqtt_enabled) {
+                Serial.println("Connecting Mqtt...");
+                if (mqtt_username.length() > 0 && mqtt_password.length() > 0) {
+                        Serial.println("Connecting MQTT with user/pass");
+                        connected = mqtt_client.connect(wifi_hostname.c_str(), (char*)mqtt_username.c_str(), (char*)mqtt_password.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str(), cleanSession);
+                } else {
+                        connected = mqtt_client.connect(wifi_hostname.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str());
+                }
 
-    ++reconnected_count;
-    if (connected) {
-        Serial.println("MQTT Connected. ");
-        mqtt_client.subscribe((char *)mqtt_topic_subscribe.c_str());
-        // Discover Notify Home Assistant
-       // discoverHA();
-    } else {
-      Serial.println("failed, rc=" + String(mqtt_client.state()) + " Try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
+                ++reconnected_count;
+                if (connected) {
+                        Serial.println("MQTT Connected. ");
+                        mqtt_client.subscribe((char *)mqtt_topic_subscribe.c_str());
+                        // Discover Notify Home Assistant
+                        // discoverHA();
+                } else {
+                        Serial.println("failed, rc=" + String(mqtt_client.state()) + " Try again in 5 seconds");
+                        // Wait 5 seconds before retrying
+                        delay(5000);
+                }
 
-  } else {
-    Serial.println("MQTT Connection is disabled...");
-  }
+        } else {
+                Serial.println("MQTT Connection is disabled...");
+        }
 }
 
 bool mqtt_reconnect() {
 
-  if (!mqtt_enabled) {
-    return false;
-  }
-  Serial.print("Status MQTT: ");
-  Serial.print(mqtt_client.state());
-  Serial.println(" Reconnecting...");
-  ++reconnected_count;
+        if (!mqtt_enabled) {
+                return false;
+        }
+        Serial.print("Status MQTT: ");
+        Serial.print(mqtt_client.state());
+        Serial.println(" Reconnecting...");
+        ++reconnected_count;
 
-  // Loop until we're reconnected
-  // (or until max retries)
+        // Loop until we're reconnected
+        // (or until max retries)
 
-  if (WiFi.status() != WL_CONNECTED) {
-    // Attempt to connect
-    setupWifi();
-  }
+        if (WiFi.status() != WL_CONNECTED) {
+                // Attempt to connect
+                setupWifi();
+        }
 
-  Serial.print(" Attempting MQTT Broker connection... ");
-  int connected = false;
+        Serial.print(" Attempting MQTT Broker connection... ");
+        int connected = false;
 
-  int lwQoS = 1; // send last will at least once
-  int lwRetain = 1;
-  String lwPayload = "Offline";
-  bool cleanSession = true;
+        int lwQoS = 1; // send last will at least once
+        int lwRetain = 1;
+        String lwPayload = "Offline";
+        bool cleanSession = true;
 
-  if (mqtt_username.length() > 0 && mqtt_password.length() > 0) {
-      Serial.println("Reconnecting with user/pass");
-      connected = mqtt_client.connect(wifi_hostname.c_str(), (char*)mqtt_username.c_str(), (char*)mqtt_password.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str(), cleanSession);
-  } else {
-      connected = mqtt_client.connect(wifi_hostname.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str());
-  }
+        if (mqtt_username.length() > 0 && mqtt_password.length() > 0) {
+                Serial.println("Reconnecting with user/pass");
+                connected = mqtt_client.connect(wifi_hostname.c_str(), (char*)mqtt_username.c_str(), (char*)mqtt_password.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str(), cleanSession);
+        } else {
+                connected = mqtt_client.connect(wifi_hostname.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str());
+        }
 
-  if (connected) {
-    Serial.println(" MQTT Connected. ");
-    mqtt_client.subscribe((char *)mqtt_topic_subscribe.c_str());
-    // discoverHA();
-  } else {
-    Serial.println("failed, rc=" + String(mqtt_client.state()) + " Try again...");
-  }
+        if (connected) {
+                Serial.println(" MQTT Connected. ");
+                mqtt_client.subscribe((char *)mqtt_topic_subscribe.c_str());
+                // discoverHA();
+        } else {
+                Serial.println("failed, rc=" + String(mqtt_client.state()) + " Try again...");
+        }
 
-  return mqtt_client.connected();
+        return mqtt_client.connected();
 
 } // End of reconnect

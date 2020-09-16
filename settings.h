@@ -33,10 +33,7 @@
 // SYSTEM
 #define DEFAULT_SYSTEM_USER "wemosem"
 #define DEFAULT_SYSTEM_PASSWORD ""
-// Energy Monitor
-// #define ENERGY
-// Motion Sensor
-// #define MOTION           // Uncomment to enable
+
 #define INTERRUPT_PIN D5  // use pin 2 on Arduino Uno & most boards
 #define SCL_PIN D6
 #define SDA_PIN D7
@@ -45,7 +42,7 @@
 // ACS712 5A  uses 185 mV per A
 // ACS712 20A uses 100 mV per A
 // ACS712 30A uses  66 mV per A
-#define DOORBELL
+
 #define ACS_PIN A0
 #define ACS_MAX_VOLTAGE 3.3
 #define ACS_MAX_ADC 1023
