@@ -10,8 +10,8 @@
 
 // Function defined in power_meter_support.h
 void resetKwh();
-String buildHADiscovery();
-String buildHAStatus();
+// String buildHADiscovery();
+// String buildHAStatus();
 
 void setupOTA() {
         // Hostname defaults to esp8266-[ChipID]
@@ -114,8 +114,10 @@ void callbackMqtt(char* topic, byte* payload, unsigned int length) {
 // The payload and headers cannot exceed 128 bytes!
 String build_payload() {
 
-        StaticJsonDocument<512> json;
+        DynamicJsonDocument json(512);
         String jsonString;
+
+        Serial.println("build_payload");
 
         // WiFi signal strength in dB
         String rssi = WifiGetRssiAsQuality(WiFi.RSSI());
@@ -129,24 +131,38 @@ String build_payload() {
         json["ical"] = String(Ical);
   #endif
   #ifdef DOORBELL
+        Serial.println(String(rmsCurrent));
         json["current"] = String(rmsCurrent);
+        Serial.println(String(mainsVoltage));
         json["voltage"] = String(mainsVoltage);
+        Serial.println(String(doorbellLength));
         json["doorbellLength"] = String(doorbellLength);
+        Serial.println(String(doorbellTime));
         json["doorbellTime"] = String(doorbellTime);
+        Serial.println(String(doorbellPressed));
         json["doorbellPressed"] = String(doorbellPressed);
   #endif
   #ifdef MOTION
         json["motion"] = String(motionAverage);
         json["temperature"] = String(temperature);
   #endif
+        Serial.println(String(reconnected_count));
         json["mqttreconnected"] = String(reconnected_count);
+        Serial.println(rssi);
         json["wifidb"] = rssi;
-        json["uptime"] = NTP.getUptimeString ();
+        Serial.println(NTP.getUptimeString());
+        json["uptime"] = NTP.getUptimeString();
+        Serial.println(NTP.getTimeDateString());
         json["time"] = NTP.getTimeDateString();
+        Serial.println(ESP.getFreeHeap());
         json["freemem"] = ESP.getFreeHeap();
+        Serial.println(VERSION);
         json["version"] = String(VERSION);
 
+        Serial.println("serializeJson");
         serializeJson(json, jsonString);
+        Serial.println("serializeJson - complete");
+        Serial.println(jsonString);
 
         return jsonString;
 }
@@ -241,8 +257,8 @@ void setupWifi() {
 
 void discoverHA() {
 
-        char topic[60], message[600];
-        String payload;
+        char topic[60], message[400];
+        char unique_id[60];
 
   #ifdef ENERGY
         // Current (A)
@@ -264,90 +280,21 @@ void discoverHA() {
 
   #endif
 
+
+
   #ifdef DOORBELL
-        Serial.println("Preparing topic HA Discover");
+        Serial.print("Preparing topic HA Discover -> ");
         sprintf_P(topic, TOPIC_HA_DOORBELL, wifi_hostname.c_str() );
-        Serial.println("Preparing message HA Discover");
-        payload = buildHADiscovery();
-        mqtt_client.publish(topic, (char*) payload.c_str(), true);
-  #endif
-  Serial.println("Preparing topic HA Discover-status");
-  sprintf_P(topic, TOPIC_HA_STATUS, wifi_hostname.c_str() );
-  Serial.println("Preparing message HA Discover");
-  payload = buildHAStatus();
-  mqtt_client.publish(topic, (char*) payload.c_str(), true);
+        Serial.println(topic);
+        Serial.print("Preparing message HA Discover -> ");
 
-        // Power (kwTotal)
-        // sprintf_P(topic, TOPIC_HA_KWTOTAL, wifi_hostname.c_str() );
-        // sprintf_P(message, MESSAGE_HA_KWTOTAL, wifi_hostname.c_str(), wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str(),wifi_hostname.c_str() );
-        // mqtt_client.publish(topic, message, true);
-
-}
-
-String buildHADiscovery() {
-
-        StaticJsonDocument<512> json;
-        String jsonString;
-        char unique_id[32];
-
-        json["name"] = wifi_hostname.c_str();
-        json["state_topic"] = mqtt_topic.c_str();
-        json["availability_topic"] = mqtt_topic_status.c_str();
-        json["payload_available"] = "online";
-        json["payload_not_available"] = "offline";
-
-        JsonArray identifiers = json.createNestedArray("identifiers");
-        identifiers.add(wifi_hostname.c_str());
-
-  #ifdef DOORBELL
-        json["value_template"] = "{{ value_json.doorbellPressed }}";
-        json["payload_on"] = "Yes";
-        json["payload_off"] = "No";
-        json["off_delay"] = 10;
         sprintf_P(unique_id, "%s_doorbell", wifi_hostname.c_str() );
+
+        sprintf_P(message, MESSAGE_HA_DOORBELL, wifi_hostname.c_str(), mqtt_topic.c_str(),mqtt_topic_status.c_str(),wifi_hostname.c_str(), unique_id );
+        Serial.println(message);
+        mqtt_client.publish(topic, message, true);
   #endif
 
-  #ifdef ENERGY
-        // Future
-  #endif
-
-  #ifdef MOTION
-        // Future
-  #endif
-        json["unique_id"] = unique_id;
-        serializeJson(json, jsonString);
-
-        return jsonString;
-}
-
-String buildHAStatus() {
-
-        StaticJsonDocument<512> json;
-        String jsonString;
-        char unique_id[32];
-
-        json["name"] = wifi_hostname.c_str();
-        json["state_topic"] = mqtt_topic.c_str();
-        json["availability_topic"] = mqtt_topic_status.c_str();
-        json["payload_available"] = "online";
-        json["payload_not_available"] = "offline";
-        json["val_tpl"] = "{{value_json.wifidb}}";
-
-        json["device"]["name"] = wifi_hostname.c_str();
-        json["device"]["model"] = MODEL;
-        json["device"]["sw_version"] = VERSION;
-        json["device"]["manufacturer"] = "WemosDB";
-
-        JsonObject device = json["device"].to<JsonObject>();
-        JsonArray identifiers = device.createNestedArray("identifiers");
-        identifiers.add(wifi_hostname.c_str());
-
-        sprintf_P(unique_id, "%s_status", wifi_hostname.c_str() );
-        json["unique_id"] = unique_id;
-
-        serializeJson(json, jsonString);
-
-        return jsonString;
 }
 
 void initMqtt() {
@@ -387,7 +334,7 @@ void initMqtt() {
                         Serial.println("MQTT Connected. ");
                         mqtt_client.subscribe((char *)mqtt_topic_subscribe.c_str());
                         // Discover Notify Home Assistant
-                        // discoverHA();
+                        discoverHA();
                 } else {
                         Serial.println("failed, rc=" + String(mqtt_client.state()) + " Try again in 5 seconds");
                         // Wait 5 seconds before retrying
@@ -435,7 +382,7 @@ bool mqtt_reconnect() {
         if (connected) {
                 Serial.println(" MQTT Connected. ");
                 mqtt_client.subscribe((char *)mqtt_topic_subscribe.c_str());
-                // discoverHA();
+                discoverHA();
         } else {
                 Serial.println("failed, rc=" + String(mqtt_client.state()) + " Try again...");
         }

@@ -53,15 +53,12 @@
 #define DOORBELL         // Current sensing door bell monitor
 
 // const PROGMEM char TOPIC_HA_KWTOTAL[] = "homeassistant/sensor/%s/kwTotal/config";
-const PROGMEM char VERSION[] = "WemosDB 1.3";
+const char VERSION[] = "WemosDB 1.3";
 const PROGMEM char TOPIC_HA_STATUS[] = "homeassistant/sensor/%s_status/config";
 #ifdef MOTION
 const PROGMEM char MODEL[] = "ESP8266 + SCT013 + MPU6050";
 #endif
-#ifdef DOORBELL
-const PROGMEM char MODEL[] = "ESP8266 + ACS712";
-const PROGMEM char TOPIC_HA_DOORBELL[] = "homeassistant/binary_sensor/%s/config";
-#endif
+
 #ifdef ENERGY
 const PROGMEM char TOPIC_HA_CURRENT[] = "homeassistant/sensor/%s/current/config";
 const PROGMEM char TOPIC_HA_POWER[] = "homeassistant/sensor/%s/power/config";
@@ -72,6 +69,24 @@ const PROGMEM char MESSAGE_HA_POWER[] = "{\"unit_of_measurement\":\"w\",\"state_
 const PROGMEM char MESSAGE_HA_KWH[] = "{\"unit_of_measurement\":\"kwh\",\"state_topic\":\"wemos/%s/power\",\"device_class\":\"power\",\"value_template\":\"{{ value_json.kwh }}\",\"json_attributes_topic\":\"wemos/%s/power\",\"name\":\"%s-kwh\",\"unique_id\":\"%s-kwh-wemosem\",\"device\":{\"identifiers\":[\"%s\"],\"name\":\"%s\",\"sw_version\":\"WemosEM 1.2\",\"model\":\"Wemos D1 Mini + SCT013\",\"manufacturer\":\"Wemos\"},\"icon\":\"mdi:counter\",\"availability_topic\":\"wemos/%s/status\"}";
 // const PROGMEM char MESSAGE_HA_KWTOTAL[] = "{\"unit_of_measurement\":\"kwTotal\",\"state_topic\":\"wemos/%s/power\",\"device_class\":\"power\",\"value_template\":\"{{ value_json.kwTotal }}\",\"json_attributes_topic\":\"wemos/%s/power\",\"name\":\"%s-kwTotal\",\"unique_id\":\"%s-kwTotal-wemosem\",\"device\":{\"identifiers\":[\"%s\"],\"name\":\"%s\",\"sw_version\":\"WemosEM 1.1\",\"model\":\"Wemos D1 Mini + SCT013\",\"manufacturer\":\"Wemos\"},\"icon\":\"mdi:counter\",\"availability_topic\":\"wemos/%s/status\"}";
 #endif
+
+#ifdef DOORBELL
+const PROGMEM char MODEL[] = "ESP8266 + ACS712";
+const PROGMEM char TOPIC_HA_DOORBELL[] = "homeassistant/binary_sensor/%s/config";
+const PROGMEM char MESSAGE_HA_DOORBELL[] = "{\"name\": \"%s\", \
+\"stat_t\": \"%s\", \
+\"avty_t\":\"%s\", \
+\"pl_avail\":\"online\", \
+\"pl_not_avail\":\"offline\", \
+\"payload_on\":\"Yes\", \
+\"payload_off\":\"No\", \
+\"device_class\":\"doorbell\", \
+\"value_template\":\"{{ value_json.doorbellPressed }}\", \
+\"device\":{\"identifiers\":[\"%s\"]}, \
+\"off_delay\": 10, \
+\"unique_id\":\"%s\"}";
+#endif
+
 // WIFI AND MQTT
 WiFiClient espClient;                  // For ESP8266 boards
 PubSubClient mqtt_client(espClient);
