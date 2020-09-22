@@ -38,7 +38,15 @@ The "Doorbell Doorbell Trigger" node is from node-red homebridge-automation modu
 
 Here is my final implementation of the door bell with integration into [Alexa](https://youtu.be/PhGbc_TO8pk).
 
+## Rebuild WEB package
 
+1 - Install GULP package ( npm install -g gulp )
+
+2 - cd ~/Code/Doorbell
+
+3 - npm install
+
+4 - ~/npm/bin/gulp
 
 # Need to cleanup below this line, this is the original README from WemosEM Codebase / Repository
 
