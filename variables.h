@@ -81,13 +81,13 @@ const PROGMEM char MESSAGE_HA_DOORBELL[] = "{\"name\": \"%s\", \
 \"avty_t\":\"%s\", \
 \"pl_avail\":\"online\", \
 \"pl_not_avail\":\"offline\", \
-\"payload_on\":\"Yes\", \
-\"payload_off\":\"No\", \
-\"device_class\":\"doorbell\", \
-\"value_template\":\"{{ value_json.doorbellPressed }}\", \
-\"device\":{\"identifiers\":[\"%s\"]}, \
-\"off_delay\": 10, \
-\"unique_id\":\"%s\"}";
+\"pl_on\":\"Yes\", \
+\"pl_off\":\"No\", \
+\"dev_cla\":\"doorbell\", \
+\"val_tpl\":\"{{ value_json.doorbellPressed }}\", \
+\"dev\":{\"identifiers\":[\"%s\"]}, \
+\"off_dly\": 10, \
+\"uniq_id\":\"%s\"}";
 #endif
 
 const PROGMEM char MESSAGE_HA_STATUS[] = "{\"name\": \"%s\", \
@@ -97,7 +97,7 @@ const PROGMEM char MESSAGE_HA_STATUS[] = "{\"name\": \"%s\", \
 \"pl_not_avail\": \"offline\", \
 \"val_tpl\": \"{{value_json['RSSI']}}\", \
 \"uniq_id\": \"%s\", \
-\"device\": {\"identifiers\":[\"%s\"],\"name\":\"%s\",\"model\":\"ESP8266 Doorbell\",\"sw_version\":\"%s\",\"manufacturer\":\"NorthernMan54\"} \
+\"dev\": {\"identifiers\":[\"%s\"],\"name\":\"%s\",\"model\":\"ESP8266 Doorbell\",\"sw_version\":\"%s\",\"manufacturer\":\"NorthernMan54\"} \
 }";
 
 // WIFI AND MQTT
