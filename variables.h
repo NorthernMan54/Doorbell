@@ -11,8 +11,11 @@
 
 // I/O
 #define Status_LED 2 // D4
+/*
 #define Status_LED_On digitalWrite(Status_LED, HIGH)
 #define Status_LED_Off digitalWrite(Status_LED, LOW)
+*/
+Ticker ticker;
 
 #define MIN_READ_EM_INTERVAL 1000        // Minimum seconds read sensor Clamp of energy meter
 #define NUM_SAMPLES 1480 // measured by Tom in Mui Wo
@@ -52,9 +55,9 @@
 // #define MOTION           // MPU6050 and Energy Monitor
 #define DOORBELL         // Current sensing door bell monitor
 
-// const PROGMEM char TOPIC_HA_KWTOTAL[] = "homeassistant/sensor/%s/kwTotal/config";
-const char VERSION[] = "WemosDB 1.3";
-const PROGMEM char TOPIC_HA_STATUS[] = "homeassistant/sensor/%s_status/config";
+const char TOPIC_HA_KWTOTAL[] PROGMEM = "homeassistant/sensor/%s/kwTotal/config";
+const char VERSION[] PROGMEM = "WemosDB 1.3";
+const char TOPIC_HA_STATUS[] PROGMEM = "homeassistant/sensor/%s_status/config";
 #ifdef MOTION
 const PROGMEM char MODEL[] = "ESP8266 + SCT013 + MPU6050";
 #endif
@@ -86,6 +89,16 @@ const PROGMEM char MESSAGE_HA_DOORBELL[] = "{\"name\": \"%s\", \
 \"off_delay\": 10, \
 \"unique_id\":\"%s\"}";
 #endif
+
+const PROGMEM char MESSAGE_HA_STATUS[] = "{\"name\": \"%s\", \
+\"stat_t\": \"%s\", \
+\"avty_t\": \"%s\", \
+\"pl_avail\": \"online\", \
+\"pl_not_avail\": \"offline\", \
+\"val_tpl\": \"{{value_json['RSSI']}}\", \
+\"uniq_id\": \"%s\", \
+\"device\": {\"identifiers\":[\"%s\"],\"name\":\"%s\",\"model\":\"ESP8266 Doorbell\",\"sw_version\":\"%s\",\"manufacturer\":\"NorthernMan54\"} \
+}";
 
 // WIFI AND MQTT
 WiFiClient espClient;                  // For ESP8266 boards

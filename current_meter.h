@@ -73,7 +73,6 @@ void acs_loop() {
                 initMqtt();
         }
 
-        Status_LED_On;
         // Publish a MQTT message with the payload
         if (mqtt_client.publish(mqtt_topic.c_str(), (char*) payload.c_str(), 0)) {
                 /*
@@ -92,5 +91,4 @@ void acs_loop() {
                 Serial.print("ERROR MQTT Topic not Published: ");
                 Serial.println(mqtt_topic);
         }
-        Status_LED_Off;
 }

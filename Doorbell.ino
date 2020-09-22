@@ -22,6 +22,8 @@
 #include <BlynkSimpleEsp8266.h>
 #include <ThingSpeak.h>
 #include <ArduinoOTA.h>
+//for LED status
+#include <Ticker.h>
 
 #include "WiFiClientPrint.h"
 #include "variables.h"
@@ -42,8 +44,6 @@
 
 unsigned long sensorRead = millis();
 
-
-
 // Initial setup
 void setup(void) {
 
@@ -52,7 +52,7 @@ void setup(void) {
         prepareHostMacAndEvents();
 
         pinMode(Status_LED, OUTPUT);          // Initialize Status LED
-        Status_LED_Off;
+        ticker.attach(0.6, tick);
 
         initSerial();
 

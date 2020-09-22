@@ -10,6 +10,7 @@
 
 // Function defined in power_meter_support.h
 void resetKwh();
+void tick();
 // String buildHADiscovery();
 // String buildHAStatus();
 
@@ -117,7 +118,7 @@ String build_payload() {
         DynamicJsonDocument json(512);
         String jsonString;
 
-        Serial.println("build_payload");
+        // Serial.println("build_payload");
 
         // WiFi signal strength in dB
         String rssi = WifiGetRssiAsQuality(WiFi.RSSI());
@@ -131,38 +132,38 @@ String build_payload() {
         json["ical"] = String(Ical);
   #endif
   #ifdef DOORBELL
-        Serial.println(String(rmsCurrent));
+        // Serial.println(String(rmsCurrent));
         json["current"] = String(rmsCurrent);
-        Serial.println(String(mainsVoltage));
+        // Serial.println(String(mainsVoltage));
         json["voltage"] = String(mainsVoltage);
-        Serial.println(String(doorbellLength));
+        // Serial.println(String(doorbellLength));
         json["doorbellLength"] = String(doorbellLength);
-        Serial.println(String(doorbellTime));
+        // Serial.println(String(doorbellTime));
         json["doorbellTime"] = String(doorbellTime);
-        Serial.println(String(doorbellPressed));
+        // Serial.println(String(doorbellPressed));
         json["doorbellPressed"] = String(doorbellPressed);
   #endif
   #ifdef MOTION
         json["motion"] = String(motionAverage);
         json["temperature"] = String(temperature);
   #endif
-        Serial.println(String(reconnected_count));
+        // Serial.println(String(reconnected_count));
         json["mqttreconnected"] = String(reconnected_count);
-        Serial.println(rssi);
+        // Serial.println(rssi);
         json["wifidb"] = rssi;
-        Serial.println(NTP.getUptimeString());
+        // Serial.println(NTP.getUptimeString());
         json["uptime"] = NTP.getUptimeString();
-        Serial.println(NTP.getTimeDateString());
+        // Serial.println(NTP.getTimeDateString());
         json["time"] = NTP.getTimeDateString();
-        Serial.println(ESP.getFreeHeap());
+        // Serial.println(ESP.getFreeHeap());
         json["freemem"] = ESP.getFreeHeap();
-        Serial.println(VERSION);
+        // Serial.println(VERSION);
         json["version"] = String(VERSION);
 
-        Serial.println("serializeJson");
+        // Serial.println("serializeJson");
         serializeJson(json, jsonString);
-        Serial.println("serializeJson - complete");
-        Serial.println(jsonString);
+        // Serial.println("serializeJson - complete");
+        // Serial.println(jsonString);
 
         return jsonString;
 }
@@ -183,6 +184,9 @@ void prepareHostMacAndEvents() {
         gotIpEventHandler = WiFi.onStationModeGotIP([] (const WiFiEventStationModeGotIP& event) {
                 Serial.print("Station connected, IP: ");
                 Serial.println(WiFi.localIP());
+                ticker.detach();
+                //keep LED on
+                digitalWrite(Status_LED, LOW);
                 wifiFirstConnected = true;
 
                 wifi_name = WiFi.SSID();
@@ -195,6 +199,8 @@ void prepareHostMacAndEvents() {
         disconnectedEventHandler = WiFi.onStationModeDisconnected([] (const WiFiEventStationModeDisconnected& event) {
                 Serial.println("Station disconnected");
                 wifiFirstConnected = false;
+                pinMode(Status_LED, OUTPUT);          // Initialize Status LED
+                ticker.attach(0.6, tick);
         });
 
         // Get MAC address of ESP8266, 6 bytes in an array
@@ -218,6 +224,16 @@ void prepareHostMacAndEvents() {
         WiFi.hostname(wifi_hostname.c_str());
 }
 
+//gets called when WiFiManager enters configuration mode
+void configModeCallback (WiFiManager *myWiFiManager) {
+        Serial.println("Entered config mode");
+        Serial.println(WiFi.softAPIP());
+        //if you used auto generated SSID, print it
+        Serial.println(myWiFiManager->getConfigPortalSSID());
+        //entered config mode, make led toggle faster
+        ticker.attach(0.2, tick);
+}
+
 // Try to connect to any of the WiFi networks configured in Custom_Settings.h
 void setupWifi() {
 
@@ -233,6 +249,7 @@ void setupWifi() {
 
         wifiManager.setConfigPortalTimeout(180);
         wifiManager.setConnectTimeout(60);
+        wifiManager.setAPCallback(configModeCallback);
         Serial.println(" Wifi " + wifi_hostname + ", password " + system_password);
         if (system_password.length() > 0 ) {
                 wifiManager.autoConnect(wifi_hostname.c_str(), system_password.c_str());
@@ -294,6 +311,18 @@ void discoverHA() {
         Serial.println(message);
         mqtt_client.publish(topic, message, true);
   #endif
+
+        Serial.print("Preparing topic HA Discover -> ");
+        sprintf_P(topic, TOPIC_HA_STATUS, wifi_hostname.c_str() );
+        Serial.println(topic);
+        Serial.print("Preparing message HA Discover -> ");
+
+        sprintf_P(unique_id, "%s_status", wifi_hostname.c_str() );
+        sprintf_P(message, MESSAGE_HA_STATUS, wifi_hostname.c_str(), mqtt_topic.c_str(),mqtt_topic_status.c_str(), unique_id, wifi_hostname.c_str(), wifi_hostname.c_str(), VERSION);
+        Serial.println(message);
+        mqtt_client.publish(topic, message, true);
+
+
 
 }
 
@@ -390,3 +419,10 @@ bool mqtt_reconnect() {
         return mqtt_client.connected();
 
 } // End of reconnect
+
+void tick()
+{
+        //toggle state
+        int state = digitalRead(Status_LED); // get the current state of GPIO1 pin
+        digitalWrite(Status_LED, !state); // set pin to the opposite state
+}
