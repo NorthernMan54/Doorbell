@@ -127,6 +127,7 @@
       // SYSTEM - TIMEZONE
       $('#reset-day').val(data.resetDay);
       $('#timezone').val(data.timezone);
+      $('#devicename').val(data.devicename);
       $('#minute-timezone').val(data.minutestimezone);
 
     }).fail(function (data) {
@@ -231,6 +232,7 @@
         systempassword: $('#systemPassword').val(),
         resetDay: $('#reset-day').val(),
         timezone: $('#timezone').val(),
+        devicename: $('#devicename').val(),
         minutestimezone: $('#minute-timezone').val()
       }).done(function (data) {
 
@@ -693,6 +695,12 @@
             <h5 style="margin: 0;">System</h5>
           </div>
           <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label for="devicename">Device Name</label>
+                <input type="text" class="form-control form-control-sm" id="devicename" placeholder="" value="">
+              </div>
+            </div>
             <div class="row">
               <div class="col-md-6 mb-2">
                 <label for="timezone">Timezone</label>

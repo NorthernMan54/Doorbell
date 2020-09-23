@@ -33,60 +33,60 @@ const del = require('del');
 const inline = require('gulp-inline');
 const inlineImages = require('gulp-css-base64');
 const favicon = require('gulp-base64-favicon');
+const log = require('fancy-log');
 
-const dataFolder = 'WemosEM/data/';
+const dataFolder = 'Doorbell/data/';
 
-gulp.task('clean', function() {
-    del([ dataFolder + '*']);
-    return true;
+gulp.task('clean', function(done) {
+  del([dataFolder + '*']);
+  done();
 });
 
-gulp.task('buildfs_embeded', ['buildfs_inline'], function() {
-
-    var source = dataFolder + 'index.html.gz';
-    var destination = dataFolder + 'index.html.gz.h';
-
-    var wstream = fs.createWriteStream(destination);
-    wstream.on('error', function (err) {
-        console.log(err);
-    });
-
-    var data = fs.readFileSync(source);
-
-    wstream.write('#define index_html_gz_len ' + data.length + '\n');
-    wstream.write('const PROGMEM char index_html_gz[] = {')
-
-    for (i=0; i<data.length; i++) {
-        if (i % 1000 == 0) wstream.write("\n");
-        wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
-        if (i<data.length-1) wstream.write(',');
-    }
-
-    wstream.write('\n};')
-    wstream.end();
-
-    del([source]);
-
+gulp.task('buildfs_inline', function(done) {
+  return gulp.src('html/*html')
+    .pipe(favicon())
+    .pipe(inline({
+      base: 'html/',
+      js: uglify,
+      css: [cleancss, inlineImages],
+      disabledTypes: ['svg', 'img']
+    }))
+    .pipe(htmlmin({
+      collapseWhitespace: true,
+      removecomments: true,
+      aside: true,
+      minifyCSS: true,
+      minifyJS: true
+    }))
+    .pipe(gzip())
+    .pipe(gulp.dest(dataFolder));
 });
 
-gulp.task('buildfs_inline', ['clean'], function() {
-    return gulp.src('html/*html')
-        .pipe(favicon())
-        .pipe(inline({
-            base: 'html/',
-            js: uglify,
-            css: [cleancss, inlineImages],
-            disabledTypes: ['svg', 'img']
-        }))
-        .pipe(htmlmin({
-            collapseWhitespace: true,
-            removecomments: true,
-            aside: true,
-            minifyCSS: true,
-            minifyJS: true
-        }))
-        .pipe(gzip())
-        .pipe(gulp.dest(dataFolder));
-})
+gulp.task('buildfs_embeded', function(done) {
 
-gulp.task('default', gulp.series('buildfs_embeded'));
+  var source = dataFolder + 'index.html.gz';
+  var destination = dataFolder + 'index.html.gz.h';
+  var wstream = fs.createWriteStream(destination);
+  wstream.on('error', function(err) {
+    console.log(err.toString());
+  });
+
+  var data = fs.readFileSync(source);
+
+  wstream.write('#define index_html_gz_len ' + data.length + '\n');
+  wstream.write('const PROGMEM char index_html_gz[] = {')
+
+  for (i = 0; i < data.length; i++) {
+    if (i % 1000 == 0) wstream.write("\n");
+    wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
+    if (i < data.length - 1) wstream.write(',');
+  }
+
+  wstream.write('\n};')
+  wstream.end();
+
+  del([source]);
+  done();
+});
+
+gulp.task('default', gulp.series('clean', 'buildfs_inline', 'buildfs_embeded'));
