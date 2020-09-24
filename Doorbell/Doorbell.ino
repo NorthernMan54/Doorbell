@@ -39,7 +39,7 @@
 #endif
 
 #ifdef DOORBELL
-  #include "current_meter.h"
+  #include "doorBell.h"
 #endif
 
 unsigned long sensorRead = millis();
@@ -49,12 +49,12 @@ void setup(void) {
 
         delay(10);
 
-        prepareHostMacAndEvents();
-
         pinMode(Status_LED, OUTPUT);          // Initialize Status LED
         ticker.attach(0.6, tick);
 
         initSerial();
+
+        prepareHostMacAndEvents();
 
         loadConfig();
 

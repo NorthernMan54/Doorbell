@@ -164,6 +164,7 @@ boolean loadConfig() {
   // SYSTEM
   system_password = (jsonConfig["system_password"] == "" ? DEFAULT_SYSTEM_PASSWORD : jsonConfig["system_password"].as<String>());
   dayReset = (jsonConfig["dayReset"] == "" ? 0 : jsonConfig["dayReset"]);
+  deviceName = (jsonConfig["deviceName"] == "" ? deviceName : jsonConfig["deviceName"].as<String>());
 
   // KWH
   watiosTotal = (jsonConfig["watiosTotal"] == "" ? 0.0 : jsonConfig["watiosTotal"]);
@@ -212,7 +213,7 @@ bool saveConfig() {
   // SYSTEM
   jsonConfig["system_password"] = system_password;
   jsonConfig["dayReset"] = dayReset;
-
+  jsonConfig["deviceName"] = deviceName;
 
   // KWH
   jsonConfig["watiosTotal"] = watiosTotal;

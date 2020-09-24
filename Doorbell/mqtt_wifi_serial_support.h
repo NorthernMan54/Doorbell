@@ -160,6 +160,8 @@ String build_payload() {
         // Serial.println(VERSION);
         json["version"] = String(VERSION);
 
+        json["devicename"] = deviceName;
+
         // Serial.println("serializeJson");
         serializeJson(json, jsonString);
         // Serial.println("serializeJson - complete");
@@ -218,8 +220,13 @@ void prepareHostMacAndEvents() {
                 }
                 My_MAC += B;
         } // End of for
+
         wifi_hostname = String(HOSTNAME_PREFIX);
         wifi_hostname.concat(My_MAC.substring(6, 12));
+
+        if ( deviceName.isEmpty()) {
+          deviceName = wifi_hostname;
+        }
 
         WiFi.hostname(wifi_hostname.c_str());
 }
@@ -307,7 +314,7 @@ void discoverHA() {
 
         sprintf_P(unique_id, "%s_doorbell", wifi_hostname.c_str() );
 
-        sprintf_P(message, MESSAGE_HA_DOORBELL, wifi_hostname.c_str(), mqtt_topic.c_str(),mqtt_topic_status.c_str(),wifi_hostname.c_str(), unique_id );
+        sprintf_P(message, MESSAGE_HA_DOORBELL, deviceName.c_str(), mqtt_topic.c_str(),mqtt_topic_status.c_str(),wifi_hostname.c_str(), unique_id );
         Serial.println(message);
         mqtt_client.publish(topic, message, true);
   #endif
@@ -317,8 +324,10 @@ void discoverHA() {
         Serial.println(topic);
         Serial.print("Preparing message HA Discover -> ");
 
+        String statusDeviceName;
+        statusDeviceName = String(deviceName + " status");
         sprintf_P(unique_id, "%s_status", wifi_hostname.c_str() );
-        sprintf_P(message, MESSAGE_HA_STATUS, wifi_hostname.c_str(), mqtt_topic.c_str(),mqtt_topic_status.c_str(), unique_id, wifi_hostname.c_str(), wifi_hostname.c_str(), VERSION);
+        sprintf_P(message, MESSAGE_HA_STATUS, statusDeviceName.c_str(), mqtt_topic.c_str(),mqtt_topic_status.c_str(), unique_id, wifi_hostname.c_str(), wifi_hostname.c_str(), VERSION);
         Serial.println(message);
         mqtt_client.publish(topic, message, true);
 
@@ -364,6 +373,7 @@ void initMqtt() {
                         mqtt_client.subscribe((char *)mqtt_topic_subscribe.c_str());
                         // Discover Notify Home Assistant
                         discoverHA();
+                        mqtt_client.publish(mqtt_topic_status.c_str(), (char*) "online", 0);
                 } else {
                         Serial.println("failed, rc=" + String(mqtt_client.state()) + " Try again in 5 seconds");
                         // Wait 5 seconds before retrying

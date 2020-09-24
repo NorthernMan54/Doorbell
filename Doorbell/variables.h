@@ -26,6 +26,7 @@ Ticker ticker;
 #define MAXLEN_MQTT_USERNAME 30
 #define MAXLEN_MQTT_PASSWORD 30
 #define MAXLEN_SYSTEM_PASSWORD 30
+#define MAXLEN_DEVICENAME 30
 
 #define MAXLEN_VOLTAGE 7
 #define MAXLEN_ICAL 6
@@ -56,7 +57,7 @@ Ticker ticker;
 #define DOORBELL         // Current sensing door bell monitor
 
 const char TOPIC_HA_KWTOTAL[] PROGMEM = "homeassistant/sensor/%s/kwTotal/config";
-const char VERSION[] PROGMEM = "WemosDB 1.3";
+const char VERSION[] = "WemosDB 1.3";
 const char TOPIC_HA_STATUS[] PROGMEM = "homeassistant/sensor/%s_status/config";
 #ifdef MOTION
 const PROGMEM char MODEL[] = "ESP8266 + SCT013 + MPU6050";
@@ -155,6 +156,7 @@ ESP8266HTTPUpdateServer httpUpdater;
 
 String My_MAC = "";                   // MAC address, to be read from ESP8266
 String wifi_hostname;
+String deviceName;
 String mqtt_topic = "None";
 String mqtt_topic_status = "None";
 String mqtt_topic_prefix_subscribe = "";

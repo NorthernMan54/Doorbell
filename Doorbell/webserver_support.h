@@ -80,6 +80,7 @@ void handleConfig() {
   json["resetDay"] = dayReset;
   json["timezone"] = timeZone;
   json["minutestimezone"] = minutesTimeZone;
+  json["devicename"] = deviceName;
 
   serializeJson(json, jsonString);
   httpServer.send(200, "application/json", jsonString);
@@ -353,12 +354,13 @@ void handleSaveCalibrate() {
 void handleSaveSystem() {
 
   StaticJsonDocument<256> json;
-  String jsonString, _dayReset, _systempassword, _timezone, _minutestimezone;
+  String jsonString, _dayReset, _systempassword, _timezone, _minutestimezone, _devicename;
 
   _dayReset = httpServer.arg("resetDay");
 	_systempassword = httpServer.arg("systempassword");
   _timezone = httpServer.arg("timezone");
   _minutestimezone = httpServer.arg("minutestimezone");
+  _devicename = httpServer.arg("devicename");
 
 
   Serial.print(" [WEB] - Password: " + _systempassword);
@@ -366,6 +368,8 @@ void handleSaveSystem() {
   Serial.print( _timezone.length());
   Serial.print(" timezone value: ");
   Serial.print( _timezone.toInt());
+  Serial.print(" deviceName value: ");
+  Serial.print( _devicename);
   Serial.print(" Reset Day: ");
   Serial.println( _dayReset.toInt());
 
@@ -392,6 +396,12 @@ void handleSaveSystem() {
   } else {
     json["minutesTimeZone"] = "Error: minutes timezone value incorrect (0-60)";
   }
+
+  if(_devicename.length() > 0 && _devicename.length() <= MAXLEN_DEVICENAME ) {
+     deviceName = _devicename;
+   } else {
+     json["devicename"] = "Error: Empty or too long";
+   }
 
   // Reconfigure NTP client
   wifiFirstConnected = true;

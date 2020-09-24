@@ -75,18 +75,7 @@ void acs_loop() {
 
         // Publish a MQTT message with the payload
         if (mqtt_client.publish(mqtt_topic.c_str(), (char*) payload.c_str(), 0)) {
-                /*
-                   Serial.print(" [MQTT] - Published: ");
-                   Serial.print(mqtt_topic);
-                   Serial.print(" > ");
-                   Serial.println(payload);
-                 */
-                mqtt_client.publish(mqtt_topic_status.c_str(), (char*) "online", 0);
-                /*
-                   Serial.print(" [MQTT] - Published: ");
-                   Serial.print(mqtt_topic_status);
-                   Serial.println(" > online");
-                 */
+  
         } else {
                 Serial.print("ERROR MQTT Topic not Published: ");
                 Serial.println(mqtt_topic);
