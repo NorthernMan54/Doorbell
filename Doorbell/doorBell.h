@@ -31,33 +31,38 @@ void acs_loop() {
         // Serial.println(mA);
 
         if ( mA >  500) { // Pressed
-          if ( currentState == 1 ) { // already pressed
-            return;
-          } else {
-            currentState = 1;
-            currentStateStart = millis();
-            return;
-          }
+                if ( currentState == 1 ) { // already pressed
+                        return;
+                } else {
+                        currentState = 1;
+                        currentStateStart = millis();
+                        return;
+                }
         } else {  // not pressed
 
-          if ( currentState == 1 ) { // already pressed
+                if ( currentState == 1 ) { // already pressed
 
-            doorbellLength = now - currentStateStart;
-            doorbellPressed = "Yes";
-            doorbellTime = NTP.getTimeDateString();
-            currentState = 0;
-          } else {  // Not pressed and no state change
+                        doorbellLength = now - currentStateStart;
+                        doorbellPressed = "Yes";
+                        doorbellTime = NTP.getTimeDateString();
+                        currentState = 0;
+                } else { // Not pressed and no state change
 
-            currentState = 0;
-            doorbellPressed = "No";
-            if (now - lastMsgMQTT < message_interval) {
-              return;
-            }
-          }
+                        currentState = 0;
+                        doorbellPressed = "No";
+                        if (now - lastMsgMQTT < message_interval) {
+                                return;
+                        }
+                }
         }
 
         mainsVoltage = analogRead(ACS_PIN) * 3.3 / 1024;
-        lastMsgMQTT = now;
+
+        if (doorbellPressed == "Yes" ) {
+                lastMsgMQTT = now - message_interval + 10000; // Send next message after 10 seconds
+        } else {
+                lastMsgMQTT = now;
+        }
         String payload = build_payload();
 
         Serial.print(" [METER] - Payload: ");
@@ -75,7 +80,7 @@ void acs_loop() {
 
         // Publish a MQTT message with the payload
         if (mqtt_client.publish(mqtt_topic.c_str(), (char*) payload.c_str(), 0)) {
-  
+
         } else {
                 Serial.print("ERROR MQTT Topic not Published: ");
                 Serial.println(mqtt_topic);

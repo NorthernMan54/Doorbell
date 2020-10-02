@@ -89,7 +89,7 @@ void setup(void) {
         em_read(true);
   #endif
 
-        lastMsgMQTT = millis();
+        lastMsgMQTT = millis() - message_interval;
         lastEMRead = millis();
         Serial.println("Setup finished");
 } // End of setup

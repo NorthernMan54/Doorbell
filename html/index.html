@@ -263,6 +263,8 @@
       $('.uptime-value').html(data.uptime);
       $('.time-value').html(data.time);
       $('.freemem-value').html(data.freemem);
+      $('.doorbellTime-value').html(data.doorbellTime);
+
 
     }).fail(function (data) {
       console.log("Error in load status of WemosEM");
@@ -427,6 +429,10 @@
             <tr>
               <th scope="row">Temperature</th>
               <td class="temperature-value">0</td>
+            </tr>
+            <tr>
+              <th scope="row">Doorbell</th>
+              <td class="doorbellTime-value">00:00:00 00/00/0000</td>
             </tr>
             <tr>
               <th scope="row">MQTT Reconnected count</th>
